@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
 namespace EspacioPersonaje
 {
     enum Clase{humano, ogro,elfo,goblin, orco,enano}
@@ -77,5 +80,41 @@ namespace EspacioPersonaje
 
             return personaje;
         }
+    }
+
+    public class PersonajesJson{
+
+        public void GuardarPersonajes(List<Personaje> personajes, string nombArchivo) {
+            
+            string json = JsonSerializer.Serialize(personajes);
+            File.WriteAllText(nombArchivo,json);
+          
+            //  using(var archivo = new FileStream(nombArchivo, FileMode.Create)){
+            //     using(var strWriter =  new StreamWriter(archivo)){
+            //         strWriter.WriteLine("{0}",personajes);
+            //         archivo.Close();
+            //     }
+            //  }
+        }
+
+        public List<Personaje> LeerPersonajes(string nombArchivo){
+            string jsonString = File.ReadAllText(nombArchivo);
+            List<Personaje> lista = JsonSerializer.Deserialize<List<Personaje>>(jsonString);
+            return lista;
+            // string documento;
+            // using( var archivoOpen = new FileStream(nombArchivo,FileMode.Open)){
+            //     using(var strReader = new StreamReader(nombArchivo)){
+            //         documento = strReader.ReadToEnd();
+            //         archivoOpen.Close();
+            //     }
+            // }
+
+            // return documento;
+        }
+
+        // public bool Existe( string nombArchivo){
+            
+        // }
+
     }
 }
