@@ -6,10 +6,8 @@ internal class Program
     {
         FabricaDePersonajes fabrica= new FabricaDePersonajes();
         PersonajesJson personajesJson = new PersonajesJson();
-        Personaje pj1;
         string archivo = "Personajes.json";
 
-        pj1 = fabrica.crearPersonaje();
 
         List<Personaje> listaPersonajes = new List<Personaje>();
 
