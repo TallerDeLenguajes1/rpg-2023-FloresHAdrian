@@ -40,7 +40,12 @@ namespace EspacioPersonaje
         public Clase Tipo { get => tipo; set => tipo = value; }
         public string CervezaFavorita { get => cervezaFavorita; set => cervezaFavorita = value; }
 
-        public void mostrarPersonaje()
+        public void mostrarPersonajeResumido()
+        {
+            System.Console.WriteLine("      Nombre:" + nombre + "\"" + apodo + "\", Edad: " + edad);
+        }
+
+        public void mostrarPersonajeTodo()
         {
             System.Console.WriteLine(nombre);
             System.Console.WriteLine(apodo);
@@ -48,6 +53,7 @@ namespace EspacioPersonaje
             System.Console.WriteLine(edad);
             System.Console.WriteLine(tipo);
             System.Console.WriteLine(velocidad);
+            System.Console.WriteLine(cervezaFavorita);
         }
     }
 
@@ -68,7 +74,6 @@ namespace EspacioPersonaje
 
             //Datos
             // personaje.Nombre = (Nombres)rdm.Next(0, (Enum.GetValues(typeof(Nombres)).Cast<Nombres>().ToArray()).Length);
-
             // var enumV = Enum.GetValues(typeof(Clase)).Cast<Clase>().ToArray();
             // personaje.Tipo = enumV[rdm.Next(enumV.Length)];
             personaje.Nombre = Constantes.Nombres2[rdm.Next(Constantes.Nombres2.Length)];
@@ -76,6 +81,7 @@ namespace EspacioPersonaje
             personaje.Tipo = (Clase)rdm.Next(0, (Enum.GetValues(typeof(Clase)).Cast<Clase>().ToArray()).Length);
             personaje.FechaNac = generarFechaNacimiento();
             personaje.Edad = calcularEdad(personaje.FechaNac);
+            personaje.CervezaFavorita = elegirCerveza();
 
             //Caracteristicas
             personaje.Velocidad = rdm.Next(1, 11);
@@ -94,11 +100,6 @@ namespace EspacioPersonaje
         {
             DateTime fechaActual = DateTime.Now;
             Random rand = new Random();
-            // int maxAnios = 300;
-            // DateTime fechaMinima = fechaActual.AddYears(-maxAnios);
-
-            // int diasTotales = (fechaActual-fechaMinima).Days;
-            // int randDias = rand.Next(diasTotales);
             DateTime fechaAleatoria = new DateTime(rand.Next(fechaActual.Year - 300, fechaActual.Year), rand.Next(1, 13), rand.Next(1, 30));
             return fechaAleatoria;
         }
@@ -135,9 +136,12 @@ namespace EspacioPersonaje
                             // {
                             //     Console.WriteLine("Nombre: " + cerveza.Nombre);
                             // }
-                        //AQUI TENGO QUE AGREGAR QUE DEVUELVA UNA CERVEZA RANDOM
-
+                            //AQUI TENGO QUE AGREGAR QUE DEVUELVA UNA CERVEZA RANDOM
+                            var rand = new Random();
+                            Cerveza cer = Cervezas[rand.Next(0, Cervezas.Count - 1)];
+                            return cer.Nombre;
                         }
+
                     }
                 }
             }
@@ -145,31 +149,115 @@ namespace EspacioPersonaje
             {
                 Console.WriteLine("Problemas de acceso a la API");
             }
-            return "Cerveza";
+            return "Cerveza Desconocida";
         }
     }
 
-    public class PersonajesJson
+    public class Combate
     {
 
-        public void GuardarPersonajes(List<Personaje> personajes, string nombArchivo)
+        public int calcularDanio(Personaje atacante, Personaje defensor)
         {
-            string json = JsonSerializer.Serialize(personajes);
-            File.WriteAllText(nombArchivo, json);
+            var rand = new Random();
+            int ataque = atacante.Destreza * atacante.Fuerza * atacante.Nivel;
+            int efectividad = rand.Next(0, 101);
+            int defensa = defensor.Armadura * defensor.Velocidad;
+            int ajuste = 100;
+            var danio = ((ataque * efectividad) - defensa) / ajuste;
+            return danio;
         }
 
-        public List<Personaje> LeerPersonajes(string nombArchivo)
+        public Personaje ganadorCombate(Personaje pj1, Personaje pj2)
         {
-            string jsonString = File.ReadAllText(nombArchivo);
-            List<Personaje> lista = JsonSerializer.Deserialize<List<Personaje>>(jsonString);
-            return lista;
+            int band = 0;
+            var rand = new Random();
+            var cont = rand.Next(1, 3);
+            int danio = 0;
+            Personaje atacante, defensor, aux;
+
+            if (cont == 1)
+            {
+                atacante = pj1;
+                defensor = pj2;
+            }
+            else
+            {
+                atacante = pj2;
+                defensor = pj1;
+            }
+            while (band != 1)
+            {
+                //Aqui va mensaje de quien ataca y quien defiende
+                danio = calcularDanio(atacante, defensor);
+                defensor.Salud -= danio;
+                System.Console.WriteLine($"{atacante.Nombre}, {atacante.Apodo}(Salud: {atacante.Salud});ataca a {defensor.Nombre}, {defensor.Apodo}(Salud:{defensor.Salud}) ");
+
+                //Aqui va mensaje de daño echo
+                if (defensor.Salud <= 0)
+                     band = 1;
+                else
+                {
+                    aux = atacante;
+                    atacante = defensor;
+                    defensor = aux;
+                }
+
+            }
+            System.Console.WriteLine($"{atacante.Nombre} Es el ganador del combate");
+            return atacante;
         }
 
-
-        public bool Existe(string nombArchivo)
+        public void eleccionCombatientes(List<Personaje> personajes)
         {
-            return File.Exists(nombArchivo) && new FileInfo(nombArchivo).Length > 0;
+            mostrarPersonajes(personajes);
+            int opc = 0;
+            int band = 1;
+            var rand = new Random();
+            Personaje ganador;
+            //Bucle para la eleccion del personaje a seguir
+            do
+            {
+                System.Console.WriteLine("Elejir un personaje a seguir:");
+            } while (!int.TryParse(Console.ReadLine(), out opc) || opc < 0 || opc > personajes.Count - 1);
+            var jugador1 = personajes[opc];
+            personajes.Remove(jugador1);
+            var jugador2 = personajes[rand.Next(0, personajes.Count)];//Asigno aleatorimente el contrincante
+            personajes.Remove(jugador2);
+
+            //Combate de toda la lista de jugadores o hasta que salga(implementar)
+            do
+            {
+                ganador = ganadorCombate(jugador1, jugador2);
+                //Agregar bonificacion de atributo
+                //Mensaje desea continuar combate
+                if (ganador.Equals(jugador1))
+                {
+                    jugador2 = personajes[rand.Next(0, personajes.Count)];//Asigno aleatorimente el contrincante
+                    personajes.Remove(jugador2);
+                }
+                else{
+                    System.Console.WriteLine("\n Mala suerte, tu personaje no lo logro");
+                    band=1;
+                }
+
+            } while (personajes.Count > 0 && band == 1);
+
+
+            System.Console.WriteLine($"{jugador1.Nombre} ES EL GRAN GANADOR DEL TORNEO");
+
         }
 
+        public void mostrarPersonajes(List<Personaje> personajes)
+        {
+            int cont = 0;
+            System.Console.WriteLine("***********Listado de Personajes***********");
+            foreach (var item in personajes)
+            {
+                System.Console.WriteLine("══════════════════════════════════════════════════════");
+                System.Console.WriteLine("Indice =" + cont);
+                item.mostrarPersonajeResumido();
+                cont++;
+            }
+        }
     }
 }
