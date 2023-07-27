@@ -161,9 +161,9 @@ namespace EspacioPersonaje
 
         public Personaje ganadorCombate(Personaje pj1, Personaje pj2)
         {
-            int band = 0;
-            var rand = new Random();
-            var cont = rand.Next(1, 3);
+            // int band = 0;
+            // var rand = new Random();
+            var cont = caraCruz();
             int danio = 0;
             Personaje atacante, defensor, aux;
 
@@ -177,7 +177,7 @@ namespace EspacioPersonaje
                 atacante = pj2;
                 defensor = pj1;
             }
-            while (band != 1)
+            while (true)
             {
                 danio = calcularDanio(atacante, defensor);
                 System.Console.WriteLine($"{atacante.Nombre}, {atacante.Apodo}(Salud: {atacante.Salud});ataca a {defensor.Nombre}, {defensor.Apodo}(Salud:{defensor.Salud}) con un daño de {danio}");
@@ -185,7 +185,7 @@ namespace EspacioPersonaje
                 defensor.Salud -= danio;
 
                 if (defensor.Salud <= 0)
-                    band = 1; //Es necesario una bandera? es mejor usar un break?
+                    break; //Es necesario una bandera? es mejor usar un break?
                 else
                 {
                     aux = atacante;
@@ -299,5 +299,28 @@ namespace EspacioPersonaje
                 cont++;
             }
         }
+
+        public int caraCruz(){
+            int op;
+            string cara = "Cara";
+            string cruz = "Cruz";
+            System.Console.WriteLine("Decidamos quien da el primer golpe, elija:");
+            do
+            {
+                System.Console.WriteLine($"1. {cara}\n2. {cruz}");
+            } while (!int.TryParse(Console.ReadLine(), out op) || op<1 || op>2);
+            var rand = new Random();
+            var cont = rand.Next(1, 3);
+            return op;
+
+            if ( op == cont) {
+                System.Console.WriteLine("Ganaste, ahora tienes el primer golpe");
+                return 1;
+            }else{
+                System.Console.WriteLine("Gano el contrincante el tiene el primer golpe");
+                return 0;
+            }
+        }
+
     }
 }
