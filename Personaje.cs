@@ -19,6 +19,7 @@ namespace EspacioPersonaje
         private int edad;
 
         private string cervezaFavorita;
+        private string embriaguez;
 
         private int velocidad;
         private int destreza;//1a 5
@@ -41,6 +42,7 @@ namespace EspacioPersonaje
         public string Tipo { get => tipo; set => tipo = value; }
         public string CervezaFavorita { get => cervezaFavorita; set => cervezaFavorita = value; }
         public int SaludMaxima { get => saludMaxima; set => saludMaxima = value; }
+        public string Embriaguez { get => embriaguez; set => embriaguez = value; }
 
         public void mostrarPersonajeResumido()
         {
@@ -66,7 +68,7 @@ namespace EspacioPersonaje
         public static string[] Tipos = { "Humano", "Orco", "Elfo", "Enano", "Gnomo" };
         public static string[] Nombres2 = { "Urhan", "Ejamar", "Qrutrix", "Oruxeor", "Ushan", "Ugovras", "Thalan", "Gaelin" };
         public static string[] Apodos = { "The Magnifecient", "The Dire One", "BoneBane", "The Wild", "Conrad del Rio", "SnakeEyes" };
-        // public static string[] EstadoEmbriaguez ={}
+        public static string[] EstadoEmbriaguez = { "Sobrio", "Ebriedad Leve", "Ebriedad Moderada", "Ebriedad Severa" };
     }
 
     public class FabricaDePersonajes
@@ -83,6 +85,7 @@ namespace EspacioPersonaje
             personaje.FechaNac = generarFechaNacimiento();
             personaje.Edad = calcularEdad(personaje.FechaNac);
             personaje.CervezaFavorita = elegirCerveza();
+            personaje.Embriaguez = Constantes.EstadoEmbriaguez[rdm.Next(Constantes.EstadoEmbriaguez.Length)];
             //Caracteristicas
             personaje.Velocidad = rdm.Next(1, 11);
             personaje.Destreza = rdm.Next(1, 6);
@@ -156,7 +159,27 @@ namespace EspacioPersonaje
             int efectividad = rand.Next(0, 101);
             int defensa = defensor.Armadura * defensor.Velocidad;
             int ajuste = 300;//Ajuste menor al pedido, porque sino demora 20 rondas cada combate
-            var danio = ((ataque * efectividad) - defensa) / ajuste;
+            int ajusteAlcoholico = 0;
+            if (atacante.Embriaguez != "Sobrio")
+            {
+                
+                switch (atacante.Embriaguez)
+                {
+                    case "Ebriedad Leve":
+                        ajusteAlcoholico = 20;
+                        break;
+                    case "Ebriedad Moderada":
+                        ajusteAlcoholico = 50;
+                        break;
+                    case "Ebriedad Severa":
+                        ajusteAlcoholico = 100;
+                        break;
+                }
+                if (atacante.Tipo == "Enano")
+                    ajusteAlcoholico *= -1;
+            }
+            var danio = ((ataque * efectividad) - defensa) / (ajuste+ajusteAlcoholico);
+
             return danio;
         }
 
