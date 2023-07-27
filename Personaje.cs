@@ -44,7 +44,8 @@ namespace EspacioPersonaje
 
         public void mostrarPersonajeResumido()
         {
-            System.Console.WriteLine("      Nombre:" + nombre + "\"" + apodo + "\", Edad: " + edad);
+            System.Console.WriteLine("      Nombre: " + nombre + " \"" + apodo + "\",Tipo: " + tipo + ", Edad: " + edad);
+            System.Console.WriteLine($" Nivel: {Nivel}, Fuerza: {Fuerza}, Destreza: {Destreza}, Armadura: {Armadura}");
         }
 
         public void mostrarPersonajeTodo()
@@ -81,7 +82,6 @@ namespace EspacioPersonaje
             personaje.FechaNac = generarFechaNacimiento();
             personaje.Edad = calcularEdad(personaje.FechaNac);
             personaje.CervezaFavorita = elegirCerveza();
-
             //Caracteristicas
             personaje.Velocidad = rdm.Next(1, 11);
             personaje.Destreza = rdm.Next(1, 6);
@@ -90,8 +90,6 @@ namespace EspacioPersonaje
             personaje.Armadura = rdm.Next(1, 11);
             personaje.Salud = 100;
             personaje.SaludMaxima = 100;
-
-
 
             return personaje;
         }
@@ -156,7 +154,7 @@ namespace EspacioPersonaje
             int ataque = atacante.Destreza * atacante.Fuerza * atacante.Nivel;
             int efectividad = rand.Next(0, 101);
             int defensa = defensor.Armadura * defensor.Velocidad;
-            int ajuste = 100;//Ajuste menor al pedido, porque sino demora 20 rondas cada combate
+            int ajuste = 300;//Ajuste menor al pedido, porque sino demora 20 rondas cada combate
             var danio = ((ataque * efectividad) - defensa) / ajuste;
             return danio;
         }
@@ -181,12 +179,11 @@ namespace EspacioPersonaje
             }
             while (band != 1)
             {
-                //Aqui va mensaje de quien ataca y quien defiende
                 danio = calcularDanio(atacante, defensor);
                 System.Console.WriteLine($"{atacante.Nombre}, {atacante.Apodo}(Salud: {atacante.Salud});ataca a {defensor.Nombre}, {defensor.Apodo}(Salud:{defensor.Salud}) con un daño de {danio}");
+                Thread.Sleep(100);
                 defensor.Salud -= danio;
 
-                //Aqui va mensaje de daño echo
                 if (defensor.Salud <= 0)
                     band = 1; //Es necesario una bandera? es mejor usar un break?
                 else
@@ -204,25 +201,31 @@ namespace EspacioPersonaje
         public void eleccionCombatientes(List<Personaje> personajes)
         {
             mostrarPersonajes(personajes);
-            int opc;
+            int opc,opc2;
             var rand = new Random();
             Personaje ganador;
             //Bucle para la eleccion del personaje a seguir
             do
             {
-                System.Console.WriteLine("Elejir un personaje a seguir:");
+                System.Console.WriteLine("\n\nElejir un personaje a seguir:");
             } while (!int.TryParse(Console.ReadLine(), out opc) || opc < 0 || opc > personajes.Count - 1);
             var jugador1 = personajes[opc];
+            System.Console.WriteLine($"El personaje elegido es");
+            jugador1.mostrarPersonajeResumido();
+            Thread.Sleep(1000);
             personajes.Remove(jugador1);
             var jugador2 = personajes[rand.Next(0, personajes.Count)];//Asigno aleatorimente el contrincante
             personajes.Remove(jugador2);
 
-            //Combate de toda la lista de jugadores o hasta que salga(implementar)
+            //Combate de toda la lista de jugadores o hasta que decida salir
             do
             {
                 ganador = ganadorCombate(jugador1, jugador2);
-                //Agregar bonificacion de atributo
-                //Mensaje desea continuar combate
+                do{
+                    System.Console.WriteLine("  ¿Desea continuar el combate?\n1. Si\n2. No");
+                }while(!int.TryParse(Console.ReadLine(), out opc2) || opc2<1 || opc2 >2);
+                if (opc2 == 2) break;
+
                 if (ganador.Equals(jugador1))
                 {
                     mejorarGanador(ganador);
@@ -237,8 +240,13 @@ namespace EspacioPersonaje
 
             } while (personajes.Count > 0);
 
-
-            System.Console.WriteLine($"{jugador1.Nombre} ES EL GRAN GANADOR DEL TORNEO");
+            if(ganador.Equals(jugador1)){
+                if(personajes.Count>0)
+                    System.Console.WriteLine("\nLastima no ganaste, pero sigues con vida y mas fuerte felicidades\n");
+                    else
+                    System.Console.WriteLine($"\nFELICIDADES {ganador.Nombre}, \"{ganador.Apodo}\" eres el CAMPEON que derroto a todos\n\n");;
+            }
+                
 
         }
 
@@ -285,7 +293,7 @@ namespace EspacioPersonaje
             System.Console.WriteLine("***********Listado de Personajes***********");
             foreach (var item in personajes)
             {
-                System.Console.WriteLine("══════════════════════════════════════════════════════");
+                System.Console.WriteLine("════════════");
                 System.Console.WriteLine("Indice =" + cont);
                 item.mostrarPersonajeResumido();
                 cont++;
