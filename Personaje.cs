@@ -66,6 +66,7 @@ namespace EspacioPersonaje
         public static string[] Tipos = { "Humano", "Orco", "Elfo", "Enano", "Gnomo" };
         public static string[] Nombres2 = { "Urhan", "Ejamar", "Qrutrix", "Oruxeor", "Ushan", "Ugovras", "Thalan", "Gaelin" };
         public static string[] Apodos = { "The Magnifecient", "The Dire One", "BoneBane", "The Wild", "Conrad del Rio", "SnakeEyes" };
+        // public static string[] EstadoEmbriaguez ={}
     }
 
     public class FabricaDePersonajes
@@ -201,7 +202,7 @@ namespace EspacioPersonaje
         public void eleccionCombatientes(List<Personaje> personajes)
         {
             mostrarPersonajes(personajes);
-            int opc,opc2;
+            int opc, opc2;
             var rand = new Random();
             Personaje ganador;
             //Bucle para la eleccion del personaje a seguir
@@ -221,9 +222,10 @@ namespace EspacioPersonaje
             do
             {
                 ganador = ganadorCombate(jugador1, jugador2);
-                do{
+                do
+                {
                     System.Console.WriteLine("  ¿Desea continuar el combate?\n1. Si\n2. No");
-                }while(!int.TryParse(Console.ReadLine(), out opc2) || opc2<1 || opc2 >2);
+                } while (!int.TryParse(Console.ReadLine(), out opc2) || opc2 < 1 || opc2 > 2);
                 if (opc2 == 2) break;
 
                 if (ganador.Equals(jugador1))
@@ -238,15 +240,16 @@ namespace EspacioPersonaje
                     break;
                 }
 
-            } while (personajes.Count > 0);
+            } while (personajes.Count >= 0);
 
-            if(ganador.Equals(jugador1)){
-                if(personajes.Count>0)
+            if (ganador.Equals(jugador1))
+            {
+                if (personajes.Count > 0)
                     System.Console.WriteLine("\nLastima no ganaste, pero sigues con vida y mas fuerte felicidades\n");
-                    else
-                    System.Console.WriteLine($"\nFELICIDADES {ganador.Nombre}, \"{ganador.Apodo}\" eres el CAMPEON que derroto a todos\n\n");;
+                else
+                    System.Console.WriteLine($"\nFELICIDADES {ganador.Nombre}, \"{ganador.Apodo}\" eres el CAMPEON que derroto a todos\n\n");
             }
-                
+
 
         }
 
@@ -256,6 +259,8 @@ namespace EspacioPersonaje
             int op = rand.Next(1, 6);
             double recuperacionSalud = ganador.SaludMaxima * 0.5;
             ganador.Salud = ganador.Salud + (int)recuperacionSalud;
+            if (ganador.Salud > ganador.SaludMaxima)
+                ganador.Salud = ganador.SaludMaxima;
 
             System.Console.WriteLine($"{ganador.Nombre} Va recibir una mejora aleatoria...");
             switch (op)
@@ -300,7 +305,8 @@ namespace EspacioPersonaje
             }
         }
 
-        public int caraCruz(){
+        public int caraCruz()
+        {
             int op;
             string cara = "Cara";
             string cruz = "Cruz";
@@ -308,15 +314,17 @@ namespace EspacioPersonaje
             do
             {
                 System.Console.WriteLine($"1. {cara}\n2. {cruz}");
-            } while (!int.TryParse(Console.ReadLine(), out op) || op<1 || op>2);
+            } while (!int.TryParse(Console.ReadLine(), out op) || op < 1 || op > 2);
             var rand = new Random();
             var cont = rand.Next(1, 3);
-            return op;
 
-            if ( op == cont) {
+            if (op == cont)
+            {
                 System.Console.WriteLine("Ganaste, ahora tienes el primer golpe");
                 return 1;
-            }else{
+            }
+            else
+            {
                 System.Console.WriteLine("Gano el contrincante el tiene el primer golpe");
                 return 0;
             }
