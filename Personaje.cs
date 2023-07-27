@@ -5,14 +5,14 @@ using System.Net;
 using System.Text.Json;
 namespace EspacioPersonaje
 {
-    public enum Clase { humano, ogro, elfo, goblin, orco, enano }
+    // public enum @string { humano, ogro, elfo, goblin, orco, enano }
 
 
     public class Personaje
     {
 
         //Caracteristicas
-        private Clase tipo;
+        private string tipo;
         private string? nombre;
         private string? apodo;
         private DateTime fechaNac;
@@ -26,6 +26,7 @@ namespace EspacioPersonaje
         private int nivel; //1 a 10
         private int armadura;// 1 a 10
         private int salud; //100
+        private int saludMaxima;
 
         public string? Nombre { get => nombre; set => nombre = value; }
         public string? Apodo { get => apodo; set => apodo = value; }
@@ -37,8 +38,9 @@ namespace EspacioPersonaje
         public int Nivel { get => nivel; set => nivel = value; }
         public int Armadura { get => armadura; set => armadura = value; }
         public int Salud { get => salud; set => salud = value; }
-        public Clase Tipo { get => tipo; set => tipo = value; }
+        public string Tipo { get => tipo; set => tipo = value; }
         public string CervezaFavorita { get => cervezaFavorita; set => cervezaFavorita = value; }
+        public int SaludMaxima { get => saludMaxima; set => saludMaxima = value; }
 
         public void mostrarPersonajeResumido()
         {
@@ -72,24 +74,22 @@ namespace EspacioPersonaje
             Personaje personaje = new Personaje();
             Random rdm = new Random();
 
-            //Datos
-            // personaje.Nombre = (Nombres)rdm.Next(0, (Enum.GetValues(typeof(Nombres)).Cast<Nombres>().ToArray()).Length);
-            // var enumV = Enum.GetValues(typeof(Clase)).Cast<Clase>().ToArray();
-            // personaje.Tipo = enumV[rdm.Next(enumV.Length)];
             personaje.Nombre = Constantes.Nombres2[rdm.Next(Constantes.Nombres2.Length)];
             personaje.Apodo = Constantes.Apodos[rdm.Next(Constantes.Apodos.Length)];
-            personaje.Tipo = (Clase)rdm.Next(0, (Enum.GetValues(typeof(Clase)).Cast<Clase>().ToArray()).Length);
+            // personaje.Tipo = (Clase)rdm.Next(0, (Enum.GetValues(typeof(Clase)).Cast<Clase>().ToArray()).Length);
+            personaje.Tipo = Constantes.Tipos[rdm.Next(Constantes.Tipos.Length)];
             personaje.FechaNac = generarFechaNacimiento();
             personaje.Edad = calcularEdad(personaje.FechaNac);
             personaje.CervezaFavorita = elegirCerveza();
 
             //Caracteristicas
             personaje.Velocidad = rdm.Next(1, 11);
-            personaje.Destreza = rdm.Next(1, 11);
+            personaje.Destreza = rdm.Next(1, 6);
             personaje.Fuerza = rdm.Next(1, 11);
             personaje.Nivel = rdm.Next(1, 11);
             personaje.Armadura = rdm.Next(1, 11);
             personaje.Salud = 100;
+            personaje.SaludMaxima = 100;
 
 
 
@@ -132,16 +132,10 @@ namespace EspacioPersonaje
                         {
                             string responseBody = objReader.ReadToEnd();
                             var Cervezas = JsonSerializer.Deserialize<List<Cerveza>>(responseBody);
-                            // foreach (var cerveza in Cervezas)
-                            // {
-                            //     Console.WriteLine("Nombre: " + cerveza.Nombre);
-                            // }
-                            //AQUI TENGO QUE AGREGAR QUE DEVUELVA UNA CERVEZA RANDOM
                             var rand = new Random();
                             Cerveza cer = Cervezas[rand.Next(0, Cervezas.Count - 1)];
                             return cer.Nombre;
                         }
-
                     }
                 }
             }
@@ -155,14 +149,14 @@ namespace EspacioPersonaje
 
     public class Combate
     {
-
+        //Metodo que devuelve el daño echo por el atacante
         public int calcularDanio(Personaje atacante, Personaje defensor)
         {
             var rand = new Random();
             int ataque = atacante.Destreza * atacante.Fuerza * atacante.Nivel;
             int efectividad = rand.Next(0, 101);
             int defensa = defensor.Armadura * defensor.Velocidad;
-            int ajuste = 100;
+            int ajuste = 100;//Ajuste menor al pedido, porque sino demora 20 rondas cada combate
             var danio = ((ataque * efectividad) - defensa) / ajuste;
             return danio;
         }
@@ -189,12 +183,12 @@ namespace EspacioPersonaje
             {
                 //Aqui va mensaje de quien ataca y quien defiende
                 danio = calcularDanio(atacante, defensor);
+                System.Console.WriteLine($"{atacante.Nombre}, {atacante.Apodo}(Salud: {atacante.Salud});ataca a {defensor.Nombre}, {defensor.Apodo}(Salud:{defensor.Salud}) con un daño de {danio}");
                 defensor.Salud -= danio;
-                System.Console.WriteLine($"{atacante.Nombre}, {atacante.Apodo}(Salud: {atacante.Salud});ataca a {defensor.Nombre}, {defensor.Apodo}(Salud:{defensor.Salud}) ");
 
                 //Aqui va mensaje de daño echo
                 if (defensor.Salud <= 0)
-                     band = 1;
+                    band = 1; //Es necesario una bandera? es mejor usar un break?
                 else
                 {
                     aux = atacante;
@@ -210,8 +204,7 @@ namespace EspacioPersonaje
         public void eleccionCombatientes(List<Personaje> personajes)
         {
             mostrarPersonajes(personajes);
-            int opc = 0;
-            int band = 1;
+            int opc;
             var rand = new Random();
             Personaje ganador;
             //Bucle para la eleccion del personaje a seguir
@@ -232,19 +225,58 @@ namespace EspacioPersonaje
                 //Mensaje desea continuar combate
                 if (ganador.Equals(jugador1))
                 {
+                    mejorarGanador(ganador);
                     jugador2 = personajes[rand.Next(0, personajes.Count)];//Asigno aleatorimente el contrincante
                     personajes.Remove(jugador2);
                 }
-                else{
-                    System.Console.WriteLine("\n Mala suerte, tu personaje no lo logro");
-                    band=1;
+                else
+                {
+                    System.Console.WriteLine("\n\n Mala suerte, tu personaje no lo logro");
+                    break;
                 }
 
-            } while (personajes.Count > 0 && band == 1);
+            } while (personajes.Count > 0);
 
 
             System.Console.WriteLine($"{jugador1.Nombre} ES EL GRAN GANADOR DEL TORNEO");
 
+        }
+
+        public void mejorarGanador(Personaje ganador)
+        {
+            var rand = new Random();
+            int op = rand.Next(1, 6);
+            double recuperacionSalud = ganador.SaludMaxima * 0.5;
+            ganador.Salud = ganador.Salud + (int)recuperacionSalud;
+
+            System.Console.WriteLine($"{ganador.Nombre} Va recibir una mejora aleatoria...");
+            switch (op)
+            {
+                case 1:
+                    System.Console.WriteLine("Se mejora la velocidad en 5");
+                    ganador.Velocidad += 5;
+                    break;
+                case 2:
+                    System.Console.WriteLine("Se mejora la destreza en 2");
+                    ganador.Destreza += 2;
+                    break;
+                case 3:
+                    System.Console.WriteLine("Se mejora la Fuerza en 5");
+                    ganador.Fuerza += 2;
+                    break;
+                case 4:
+                    System.Console.WriteLine("Se mejora la Armadura en 5");
+                    ganador.Armadura += 5;
+                    break;
+                case 5:
+                    System.Console.WriteLine("Se mejora la Salud en 10");
+                    ganador.Salud += 10;
+                    ganador.SaludMaxima += 10;
+                    break;
+                default:
+                    break;
+            }
+            // return ganador;
         }
 
         public void mostrarPersonajes(List<Personaje> personajes)
