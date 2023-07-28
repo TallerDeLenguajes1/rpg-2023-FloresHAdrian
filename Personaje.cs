@@ -68,7 +68,7 @@ namespace EspacioPersonaje
         public static string[] Tipos = { "Humano", "Orco", "Elfo", "Enano", "Gnomo" };
         public static string[] Nombres2 = { "Urhan", "Ejamar", "Qrutrix", "Oruxeor", "Ushan", "Ugovras", "Thalan", "Gaelin" };
         public static string[] Apodos = { "The Magnifecient", "The Dire One", "BoneBane", "The Wild", "Conrad del Rio", "SnakeEyes" };
-        public static string[] EstadoEmbriaguez = { "Sobrio", "Ebriedad Leve", "Ebriedad Moderada", "Ebriedad Severa" };
+        public static string[] EstadoEmbriaguez = { "Sobrio", "Ebriedad Leve", "Ebriedad Moderada", "Ebriedad Severa", "Intoxicado" };
     }
 
     public class FabricaDePersonajes
@@ -85,7 +85,7 @@ namespace EspacioPersonaje
             personaje.FechaNac = generarFechaNacimiento();
             personaje.Edad = calcularEdad(personaje.FechaNac);
             personaje.CervezaFavorita = elegirCerveza();
-            personaje.Embriaguez = Constantes.EstadoEmbriaguez[rdm.Next(Constantes.EstadoEmbriaguez.Length)];
+            personaje.Embriaguez = Constantes.EstadoEmbriaguez[rdm.Next(Constantes.EstadoEmbriaguez.Length-1)];
             //Caracteristicas
             personaje.Velocidad = rdm.Next(1, 11);
             personaje.Destreza = rdm.Next(1, 6);
@@ -162,7 +162,7 @@ namespace EspacioPersonaje
             int ajusteAlcoholico = 0;
             if (atacante.Embriaguez != "Sobrio")
             {
-                
+
                 switch (atacante.Embriaguez)
                 {
                     case "Ebriedad Leve":
@@ -178,7 +178,7 @@ namespace EspacioPersonaje
                 if (atacante.Tipo == "Enano")
                     ajusteAlcoholico *= -1;
             }
-            var danio = ((ataque * efectividad) - defensa) / (ajuste+ajusteAlcoholico);
+            var danio = ((ataque * efectividad) - defensa) / (ajuste + ajusteAlcoholico);
 
             return danio;
         }
@@ -239,10 +239,13 @@ namespace EspacioPersonaje
             Thread.Sleep(1000);
             personajes.Remove(jugador1);
             var jugador2 = personajes[rand.Next(0, personajes.Count)];//Asigno aleatorimente el contrincante
+            System.Console.WriteLine("El contrincante sera:");
+            jugador2.mostrarPersonajeResumido();
             personajes.Remove(jugador2);
+            ganador=jugador1; //Hago esta asignacion para evitar en error en la linea 270
 
             //Combate de toda la lista de jugadores o hasta que decida salir
-            do
+            while (personajes.Count >= 0 || jugador1.Embriaguez != "Intoxicado")
             {
                 ganador = ganadorCombate(jugador1, jugador2);
                 do
@@ -256,21 +259,21 @@ namespace EspacioPersonaje
                     mejorarGanador(ganador);
                     jugador2 = personajes[rand.Next(0, personajes.Count)];//Asigno aleatorimente el contrincante
                     personajes.Remove(jugador2);
+                    tomarCerveza(ganador);
                 }
                 else
                 {
-                    System.Console.WriteLine("\n\n Mala suerte, tu personaje no lo logro");
-                    break;
+                    System.Console.WriteLine("\n\n Te rindes y te abuchean, el barman dice que te vayas que aqui no sirven a cobardes\nEstas afuera y sobrio, decides buscar otro bar quizas tengas mas suerte\n");
                 }
 
-            } while (personajes.Count >= 0);
+            } 
 
-            if (ganador.Equals(jugador1))
+            if (ganador.Equals(jugador1) )
             {
-                if (personajes.Count > 0)
-                    System.Console.WriteLine("\nLastima no ganaste, pero sigues con vida y mas fuerte felicidades\n");
+                if (personajes.Count > 0 || ganador.Embriaguez!="Intoxicado")
+                    System.Console.WriteLine("\n\nTe despiertas en el piso y no hay nadie alrededor, pero no porque hayas ganado.\n Almenos alguien te dejo una cerveza en tu mano... esta caliente.\n");
                 else
-                    System.Console.WriteLine($"\nFELICIDADES {ganador.Nombre}, \"{ganador.Apodo}\" eres el CAMPEON que derroto a todos\n\n");
+                    System.Console.WriteLine($"\n\nFELICIDADES {ganador.Nombre}, \"{ganador.Apodo}\" eres el ultimo aventurero en pie, te ganaste una cerveza gratis,\n igual quien queda para cobrarte?\n\n");
             }
 
 
@@ -325,6 +328,21 @@ namespace EspacioPersonaje
                 System.Console.WriteLine("Indice =" + cont);
                 item.mostrarPersonajeResumido();
                 cont++;
+            }
+        }
+
+        public void tomarCerveza(Personaje jugador)
+        {
+            int op,indice;
+            do
+            {
+                System.Console.WriteLine($"Estas vivo y con sed, que vas tomar:");
+                System.Console.WriteLine($"1. Agua");
+                System.Console.WriteLine($"2. {jugador.CervezaFavorita} ");
+            } while (!int.TryParse(Console.ReadLine(), out op) || op < 1 || op > 2);
+            if(op==2){
+                indice = Array.IndexOf(Constantes.EstadoEmbriaguez, jugador.Embriaguez);
+                jugador.Embriaguez = Constantes.EstadoEmbriaguez[indice+1];
             }
         }
 

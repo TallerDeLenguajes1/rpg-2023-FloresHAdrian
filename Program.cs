@@ -7,30 +7,33 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        PersonajesJson personajesJson = new PersonajesJson();
-        string archivo = "Personajes.json";
-        List<Personaje> listaPersonajes = new List<Personaje>();
-
-        if (personajesJson.Existe(archivo))
-        {//Si el archivo existe trabajo con el json
-            listaPersonajes = personajesJson.LeerPersonajes(archivo);
-        }
-        else
-        {//Si no existe creo 10 intancias random y las agrego
-            listaPersonajes = crearListaPersonajes(archivo,personajesJson);
-        }
 
 
-        System.Console.WriteLine("\n\n****************GAME START****************");
+        System.Console.WriteLine("\n\n**************** BAR BRAWL****************");
+        System.Console.WriteLine("\"Un largo dia de calabozos estas cansado, entras al primer bar que encuentras\n y por alguna razon todos quieren pelear por turnos contra vos,\n tambien sera una noche larga\"");
+
         int op;
         var Combate = new Combate();
         do
         {
-            System.Console.WriteLine("\n\n************ Menu Principal ************");
-            System.Console.WriteLine("              1.Iniciar Juego             ");
-            System.Console.WriteLine("              2.Mostrar lista de personajes             ");
-            System.Console.WriteLine("              3.Crear nueva lista de personajes            ");
-            System.Console.WriteLine("              4.Salir             ");
+            PersonajesJson personajesJson = new PersonajesJson();
+            string archivo = "Personajes.json";
+            List<Personaje> listaPersonajes = new List<Personaje>();
+
+            if (personajesJson.Existe(archivo))
+            {//Si el archivo existe trabajo con el json
+                listaPersonajes = personajesJson.LeerPersonajes(archivo);
+            }
+            else
+            {//Si no existe creo 10 intancias random y las agrego
+                crearListaPersonajes(listaPersonajes,archivo, personajesJson);
+            }
+
+            System.Console.WriteLine("\n\n****** Menu Principal ******");
+            System.Console.WriteLine("       1.Iniciar Juego             ");
+            System.Console.WriteLine("       2.Mostrar lista de personajes             ");
+            System.Console.WriteLine("       3.Crear nueva lista de personajes            ");
+            System.Console.WriteLine("       4.Salir             ");
 
             int.TryParse(Console.ReadLine(), out op);
             switch (op)
@@ -42,7 +45,7 @@ internal class Program
                     Combate.mostrarPersonajes(listaPersonajes);
                     break;
                 case 3:
-                    listaPersonajes = crearListaPersonajes(archivo,personajesJson);
+                    crearListaPersonajes(listaPersonajes,archivo, personajesJson);
                     break;
                 case 4:
                     System.Console.WriteLine("GAME OVER");
@@ -51,11 +54,11 @@ internal class Program
                     System.Console.WriteLine("Opcion incorrecta");
                     break;
             }
-        } while (op!=4);
+        } while (op != 4);
     }
 
 
-    public static List<Personaje> crearListaPersonajes(string archivo, PersonajesJson personajesJson)
+    public static List<Personaje> crearListaPersonajes(List<Personaje> lista,string archivo, PersonajesJson personajesJson)
     {
         List<Personaje> listaPersonajes = new List<Personaje>();//Variable donde guardo los personajes
         FabricaDePersonajes fabrica = new FabricaDePersonajes();//Variable que uso para crear personajes
