@@ -46,8 +46,8 @@ namespace EspacioPersonaje
 
         public void mostrarPersonajeResumido()
         {
-            System.Console.WriteLine("      Nombre: " + nombre + " \"" + apodo + "\",Tipo: " + tipo + ", Edad: " + edad);
-            System.Console.WriteLine($" Nivel: {Nivel}, Fuerza: {Fuerza}, Destreza: {Destreza}, Armadura: {Armadura}");
+            System.Console.WriteLine(" \n     Nombre: " + nombre + " \"" + apodo + "\",Tipo: " + tipo + ", Edad: " + edad);
+            System.Console.WriteLine($" Nivel: {Nivel}, Fuerza: {Fuerza}, Destreza: {Destreza}, Armadura: {Armadura}\n");
         }
 
         public void mostrarPersonajeTodo()
@@ -85,7 +85,7 @@ namespace EspacioPersonaje
             personaje.FechaNac = generarFechaNacimiento();
             personaje.Edad = calcularEdad(personaje.FechaNac);
             personaje.CervezaFavorita = elegirCerveza();
-            personaje.Embriaguez = Constantes.EstadoEmbriaguez[rdm.Next(Constantes.EstadoEmbriaguez.Length-1)];
+            personaje.Embriaguez = Constantes.EstadoEmbriaguez[rdm.Next(Constantes.EstadoEmbriaguez.Length - 1)];
             //Caracteristicas
             personaje.Velocidad = rdm.Next(1, 11);
             personaje.Destreza = rdm.Next(1, 6);
@@ -187,7 +187,8 @@ namespace EspacioPersonaje
         {
             // int band = 0;
             // var rand = new Random();
-            var cont = caraCruz();
+            // var cont = caraCruz();
+            var cont = 1;
             int danio = 0;
             Personaje atacante, defensor, aux;
 
@@ -225,7 +226,7 @@ namespace EspacioPersonaje
         public void eleccionCombatientes(List<Personaje> personajes)
         {
             mostrarPersonajes(personajes);
-            int opc, opc2;
+            int opc, opc2,bandera=999;
             var rand = new Random();
             Personaje ganador;
             //Bucle para la eleccion del personaje a seguir
@@ -242,39 +243,49 @@ namespace EspacioPersonaje
             System.Console.WriteLine("El contrincante sera:");
             jugador2.mostrarPersonajeResumido();
             personajes.Remove(jugador2);
-            ganador=jugador1; //Hago esta asignacion para evitar en error en la linea 270
+            ganador = jugador1; //Hago esta asignacion para evitar en error en la linea 270
 
             //Combate de toda la lista de jugadores o hasta que decida salir
-            while (personajes.Count >= 0 || jugador1.Embriaguez != "Intoxicado")
+            while (bandera > 0 && jugador1.Embriaguez != "Intoxicado")
             {
                 ganador = ganadorCombate(jugador1, jugador2);
-                do
-                {
-                    System.Console.WriteLine("  ¿Desea continuar el combate?\n1. Si\n2. No");
-                } while (!int.TryParse(Console.ReadLine(), out opc2) || opc2 < 1 || opc2 > 2);
-                if (opc2 == 2) break;
+
 
                 if (ganador.Equals(jugador1))
                 {
+
+
                     mejorarGanador(ganador);
-                    jugador2 = personajes[rand.Next(0, personajes.Count)];//Asigno aleatorimente el contrincante
-                    personajes.Remove(jugador2);
+                    if (personajes.Count > 0)
+                    {
+                    // do
+                    // {
+                    //     System.Console.WriteLine("  ¿Desea continuar el combate?\n1. Si\n2. No");
+                    // } while (!int.TryParse(Console.ReadLine(), out opc2) || opc2 < 1 || opc2 > 2);
+                    // if (opc2 == 2) break;
+                        bandera= personajes.Count;
+                        jugador2 = personajes[rand.Next(0, personajes.Count)];//Asigno aleatorimente el contrincante
+                        personajes.Remove(jugador2);
+                    }else{
+                        bandera=-1;
+                    }
+
                     tomarCerveza(ganador);
                 }
                 else
                 {
-                    System.Console.WriteLine("\n\n Te rindes y te abuchean, el barman dice que te vayas que aqui no sirven a cobardes\nEstas afuera y sobrio, decides buscar otro bar quizas tengas mas suerte\n");
+                    break;
                 }
 
-            } 
-
-            if (ganador.Equals(jugador1) )
-            {
-                if (personajes.Count > 0 || ganador.Embriaguez!="Intoxicado")
-                    System.Console.WriteLine("\n\nTe despiertas en el piso y no hay nadie alrededor, pero no porque hayas ganado.\n Almenos alguien te dejo una cerveza en tu mano... esta caliente.\n");
-                else
-                    System.Console.WriteLine($"\n\nFELICIDADES {ganador.Nombre}, \"{ganador.Apodo}\" eres el ultimo aventurero en pie, te ganaste una cerveza gratis,\n igual quien queda para cobrarte?\n\n");
             }
+
+
+            if (personajes.Count > 0 || ganador.Embriaguez == "Intoxicado")
+                System.Console.WriteLine("\n\nTe despiertas en el piso y no hay nadie alrededor, pero no porque hayas ganado.\n Almenos alguien te dejo una cerveza en tu mano... esta caliente.\n");
+            else
+                System.Console.WriteLine($"\n\nFELICIDADES {ganador.Nombre}, \"{ganador.Apodo}\" eres el ultimo aventurero en pie, te ganaste una cerveza gratis,\n igual quien queda para cobrarte?\n\n");
+
+
 
 
         }
@@ -333,16 +344,17 @@ namespace EspacioPersonaje
 
         public void tomarCerveza(Personaje jugador)
         {
-            int op,indice;
+            int op, indice;
             do
             {
                 System.Console.WriteLine($"Estas vivo y con sed, que vas tomar:");
                 System.Console.WriteLine($"1. Agua");
                 System.Console.WriteLine($"2. {jugador.CervezaFavorita} ");
             } while (!int.TryParse(Console.ReadLine(), out op) || op < 1 || op > 2);
-            if(op==2){
+            if (op == 2)
+            {
                 indice = Array.IndexOf(Constantes.EstadoEmbriaguez, jugador.Embriaguez);
-                jugador.Embriaguez = Constantes.EstadoEmbriaguez[indice+1];
+                jugador.Embriaguez = Constantes.EstadoEmbriaguez[indice + 1];
             }
         }
 
